@@ -1,0 +1,24 @@
+---
+title: "Revision history for bayez repository"
+author: "Nathan (Nat) Goodman"
+date: "September 6, 2019"
+output:
+  html_document: default
+  github_document:
+    html_preview: no
+  pdf_document: default
+linkcolor: cyan
+citecolor: green
+urlcolor: blue
+---
+<!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+
+## Release 0.10 2019-09-06
+
+First version. Contains boilerplate files such as this one.
+
+## Copyright & License
+
+Copyright (c) 2019 Nathan Goodman
+
+The software is **open source and free**, released under the [MIT License](https://opensource.org/licenses/MIT). The documentation is **open access**, released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0).

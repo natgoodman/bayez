@@ -1,0 +1,12 @@
+Package: bayez
+Title: Easy examples exploring Bayesian methods
+Version: 0.00
+Authors@R: person("Nathan", "Goodman", email = "natg@shore.net", role = c("aut", "cre"))
+Description: A collection of R scripts and documents exploring mistakes made by significance testing.
+Depends: R (>= 3.4.3)
+Imports: 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/natgoodman/bayez
+BugReports: https://github.com/natgoodman/bayez/issues
