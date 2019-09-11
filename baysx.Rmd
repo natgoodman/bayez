@@ -1,0 +1,69 @@
+---
+title: "Bayesian Basics for True Effect Size Post"
+author: "Nathan (Nat) Goodman"
+date: "September 15, 2019"
+output:
+  html_document:
+    css: css/html_document.css
+    highlight: kate
+  pdf_document: default
+  word_document: default
+linkcolor: cyan
+citecolor: green
+urlcolor: blue
+---
+
+## Bayesian details 
+
+The snippet of math below is Bayes's formula for example at hand. An important nuance is that the "probabilities" are *probability densities* - think R's `dnorm`. 
+
+$$
+P(d_{true} \mid d_{obs}) = \frac {P(d_{true}) \times P(d_{obs} \mid d_{true}) } {P(d_{obs})}
+$$
+* The term on the left hand side is what we're trying to compute, namely, the posterior probability distribution of $d_{true}$ for a given value of $d_{obs}$ ($0.5$ in the running example). 
+
+* The first term on the right hand side, $P(d_{true})$, is the prior. For the normal prior in Figures 2 and 3, this is R's `dnorm` with $mean=0.3$ and $sd=0.2$.
+
+* The next term, $P(d_{obs} \mid d_{true})$, is the probability distribution of $d_{obs}$ for a given $d_{true}$. For the running example, this is a noncentral t-distribution.
+
+* The denominator, $P(d_{obs})$, is the probability of a given value of $d_{obs}$ across all values of $d_{true}$. To compute this, you integrate the numerator for $d_{true}$ ranging from $-\infty$ to $\infty$.
+
+Below is R code to compute the posterior for the examples in this post.
+
+``` {r eval=FALSE}
+## Compute the posterior probability density of d.true given d.obs for the examples in this post
+##   d.true, d.obs are standardized effect sizes
+##   n is the sample size per group
+##   prior is a function giving the prior probability density of d.true; see examples below
+posterior=function(d.true,d.obs,n,prior) {
+  ## probability of d.obs given d.true for the examples at hand
+  ##   d_d2t is my function for probability density of the noncentral t in terms of sample size, d.true, and d.obs
+  ##   see code in https://natgoodman.github.io/repwr/stats.stable.html
+  P_obsGIVENtrue=function(d.true) d_d2t(n=n,d0=d.true,d=d.obs);
+  ## numerator in Bayes formula
+  numerator=function(d.true) prior(d.true)*P_obsGIVENtrue(d.true);
+  ## denominator in Bayes formula
+  P_obs=integrate(function(d.true) numerator(d.true),-Inf,Inf)$value;
+  ## final answer
+  numerator(d.true)/P_obs;
+}
+
+## example priors
+## uniform centered on d0
+prior_unif=function(d0,u) {
+  span=u/2;
+  lim=d.obs+c(-span,span);
+  function(d.true) dunif(d.true,d0-span,d0+span);
+}
+## normal with given mean and sd
+prior_norm=function(mean.prior,sd.prior) 
+  function(d.pop) dnorm(d.pop,mean=mean.prior,sd=sd.prior);
+
+## Example
+posterior(d.true=seq(0,1,by=0.2),d.obs=0.5,n=20,prior=prior_norm(mean=0.3,sd=0.2));
+## [1] 0.258453797 1.534427917 2.274534502 0.841955050 0.077840115 0.001797645
+
+```
+## Comments Please!
+
+Please post comments on [Twitter](https://twitter.com/gnatgoodman) or [Facebook](https://www.facebook.com/nathan.goodman.3367), or contact me by email [natg@shore.net](mailto:natg@shore.net).
