@@ -1,12 +1,25 @@
-Easy Examples Exploring Bayesian Method
+Easy Examples Exploring Bayesian Methods
 ================
 Nathan (Nat) Goodman
-September 6, 2019
+September 15, 2019
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-A collection of code and documents using easy example to explore Bayesian methods. The content at present is a blog post in progress that uses Bayesian methods to estimate true effect size. More TBD.
+A collection of R scripts and documents exploring Bayesian methods through easy examples. The content at present is a blog post in progress that uses Bayesian methods to estimate true effect size. More TBD.
+
+A collection of R scripts and documents exploring mistakes made by significance testing. The content at present are
+
+-   blog post [What's the Effect Size?](https://natgoodman.github.io/bayez/effit.stable.html) using Bayesian methods to estimate effect size in two group difference-of-mean studies
+
+-   working paper [Bayesian Basics](https://natgoodman.github.io/bayez/baysx.stable.html) with a simple R implementation of Bayes's formula
 
 **THE SOFTWARE IS A WORK IN PROGRESS. THE CODE IS ROUGH and SOFTWARE DOCUMENTATION NONEXISTENT. MUCH OF THE CODE DOESN'T WORK!! PLEASE GET IN TOUCH IF YOU NEED HELP**
+
+Installation and Usage
+----------------------
+
+The software is **not a package** and cannot be installed by `devtools::install_github` or related. Sorry. The simplest way to get the software is to download or clone the entire repo.
+
+More TBD.
 
 Comments Please!
 ----------------
