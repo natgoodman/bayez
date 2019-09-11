@@ -6,9 +6,7 @@ September 15, 2019
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 A collection of R scripts and documents exploring Bayesian methods through easy examples. The content at present is a blog post in progress that uses Bayesian methods to estimate true effect size. More TBD.
 
-A collection of R scripts and documents exploring mistakes made by significance testing. The content at present are
-
--   blog post [What's the Effect Size?](https://natgoodman.github.io/bayez/effit.stable.html) using Bayesian methods to estimate effect size in two group difference-of-mean studies
+-   blog post [What's the Effect Size?](https://natgoodman.github.io/bayez/effit.stable.html) using Bayesian methods to estimate true effect size in two group difference-of-mean studies
 
 -   working paper [Bayesian Basics](https://natgoodman.github.io/bayez/baysx.stable.html) with a simple R implementation of Bayes's formula
 
