@@ -1,9 +1,17 @@
 Revision history for bayez repository
 ================
 Nathan (Nat) Goodman
-September 6, 2019
+September 11, 2019
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 0.20 2019-09-11
+-----------------------
+
+-   Initial release of code files. Most are pruned versions of files copied from `misigXper`
+-   Initial release of `effit` document
+-   Initial release of `baysx` document - very rough!
+-   Add basic content to README
+
 Release 0.10 2019-09-06
 -----------------------
 
