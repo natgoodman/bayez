@@ -10,12 +10,12 @@
 ##
 ## Copyright (C) 2019 Nat Goodman.
 ## 
-## Generate figures and tables for ovrfx blog post
+## Generate figures and tables for bayez README
 ##
 ## This software is open source, distributed under the MIT License. See LICENSE
 ## file at https://github.com/natgoodman/NewPro/FDR/LICENSE 
 ##
 #################################################################################
-## --- Generate Figures and Tables for misig README ---
+## --- Generate Figures and Tables for README ---
 ## STUB obviously
 doc_readme=function(sect=NULL) { }
