@@ -21,7 +21,7 @@ SOURCE=c('R/util.R','R/datman.R','R/doc.R','R/init.R','R/stats.R');
 
 ## ---- source the files ----
 ## source default files. assume README doc until init runs
-source_dflt=function(files=SOURCE) {
+source_files=function(files=SOURCE) {
   sapply(files,source);
   invisible();
 }
@@ -42,7 +42,10 @@ source_ifexists=function(file) if (file.exists(file)) source(file);
 ## NG 19-09-10: can't call param(doc) in empty workspace - param.env doens't exist
 ## source_all=function(files=SOURCE,doc=param(doc)) {
 source_all=function(files=SOURCE) {
-  source_dflt(files);
+  source_files(files);
+  ## source dat_XXX, doc_XXX files so top level functions defined
+  ## NOTE: these top level files call init which resources doc-specific files
+  source_files(list.files('R',pattern='^(doc_|dat_).*.R',full.names=T));
   if (exists('param.env')) source_doc();
 }
 source_all();
