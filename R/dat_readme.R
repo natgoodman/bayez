@@ -14,5 +14,7 @@
 #################################################################################
 ## ---- Data Generation for README ----
 ## STUB obviously
-dat_readme=function() {}
+dat_readme=function(...) {
+  init(doc='readme',...);
+}
 

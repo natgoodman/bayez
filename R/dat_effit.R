@@ -14,7 +14,8 @@
 ##
 #################################################################################
 library(nor1mix);
-dat_effit=function() {
+dat_effit=function(...) {
+  init(doc='effit',...);
   param(n,m,prop.true,d0,mean.true,sd.true,mean.false,sd.false,tol,m1,mmax);
   n.lo=if(length(n)>2) sort(n)[1:2] else min(n); n.hi=max(n);
   prop.lo=min(prop.true); prop.hi=max(prop.true);

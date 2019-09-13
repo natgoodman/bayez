@@ -14,5 +14,7 @@
 #################################################################################
 ## ---- Data Generation for README ----
 ## STUB obviously
-dat_baysx=function() {}
+dat_baysx=function(...) {
+  init(doc='baysx',...);
+}
 
