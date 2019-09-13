@@ -19,7 +19,7 @@
 ## process parameters and store in param environment.
 ## create output directories if necessary
 ## readme params placeholders
-doc.all=cq(readme,effit);
+doc.all=cq(readme,effit,baysx);
 init=function(
   ## doc parameters 
   doc='readme',                           # controls various defaults
@@ -120,10 +120,10 @@ init=function(
       paths=list.files(datadir,full.names=T);
       unlink(paths[!file.info(paths)$isdir]);
     }
-    if (clean.sim) unlink(simdir);
+    if (clean.sim) unlink(simdir,recursive=T);
   }
-  if (clean.fig) unlink(figdir);
-  if (clean.tbl) unlink(tbldir);
+  if (clean.fig) unlink(figdir,recursive=T);
+  if (clean.tbl) unlink(tbldir,recursive=T);
   sapply(alldir,function(dir) dir.create(dir,recursive=TRUE,showWarnings=FALSE));
   invisible(param.env);
 }
