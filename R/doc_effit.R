@@ -16,8 +16,8 @@
 ## --- Generate Figures and Tables for effit Blog Post ---
 library(nor1mix);
 ## no sections. only 4 figures
-## TODO: turn constants into params
-doc_effit=function(sect=NULL,n.loi=1) {
+doc_effit=function(sect=NULL,n.loi=1,...) {
+  init(doc='effit',...);
   param(n,m,prop.true,d0,mean.true,sd.true,mean.false,sd.false);
   n.lo=if(length(n)>2) sort(n)[n.loi] else min(n); n.hi=max(n);
   prop.lo=min(prop.true); prop.hi=max(prop.true);

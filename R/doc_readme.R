@@ -18,4 +18,6 @@
 #################################################################################
 ## --- Generate Figures and Tables for README ---
 ## STUB obviously
-doc_readme=function(sect=NULL) { }
+doc_readme=function(sect=NULL,...) {
+  init(doc='readme',...);
+}
