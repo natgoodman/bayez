@@ -163,9 +163,9 @@ figinc=function(extra=FALSE)
   }
 figblk_start=function(extra=FALSE) {
   if (extra) return(xfigblk_start());
-  ## param(figblk,fignum);
-  ## ## if already in block, end it
-  ## if (!is.null(figblk)) param(fignum=fignum+1);
+  param(figblk,fignum);
+  ## if already in block, end it
+  if (!is.null(figblk)) param(fignum=fignum+1);
   param(figblk=1);
 }
 figblk_end=function(extra=FALSE) {
@@ -175,9 +175,9 @@ figblk_end=function(extra=FALSE) {
   if (!is.null(figblk)) param(figblk=NULL,fignum=fignum+1);
 }
 xfigblk_start=function() {
-  ## param(xfigblk,xfignum);
-  ## ## if already in block, end it
-  ## if (!is.null(xfigblk)) param(xfignum=xfignum+1);
+  param(xfigblk,xfignum);
+  ## if already in block, end it
+  if (!is.null(xfigblk)) param(xfignum=xfignum+1);
   param(xfigblk=1);
 }
 xfigblk_end=function() {
@@ -190,9 +190,9 @@ tblinc=function() {
     if (!is.null(tblblk)) param(tblblk=tblblk+1) else param(tblnum=tblnum+1);
 }
 tblblk_start=function() {
-  ## param(tblblk,tblnum);
-  ## ## if already in block, end it
-  ## if (!is.null(tblblk)) param(tblnum=tblnum+1);
+  param(tblblk,tblnum);
+  ## if already in block, end it
+  if (!is.null(tblblk)) param(tblnum=tblnum+1);
   param(tblblk=1);
 }
 tblblk_end=function() {
