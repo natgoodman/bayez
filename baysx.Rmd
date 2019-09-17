@@ -43,8 +43,8 @@ Below is R code to compute the posterior for the examples in this post. The code
 ##   prior is function of d.pop, eg, function(d.pop) dnorm(d.pop,mean=0.3,sd=0.1)
 ##
 posterior=function(n,d.obs,prior) {
-  ## probability of d.obs given d.pop for examples at hand. d_d2t defined below
-  P_obsGIVENpop=function(d.pop) d_d2t(n,d.pop,d.obs);
+  ## probability of d.obs given d.pop for examples at hand. dd2t defined below
+  P_obsGIVENpop=function(d.pop) dd2t(n,d.pop,d.obs);
   ## numerator in Bayes formula
   numerator=function(d.pop) prior(d.pop)*P_obsGIVENpop(d.pop);
   ## denominator in Bayes formula
@@ -55,7 +55,7 @@ posterior=function(n,d.obs,prior) {
 
 ## probability density of noncentral t in terms of n, d.pop, d.obs
 ##   adapted from https://natgoodman.github.io/repwr/stats.stable.html
-d_d2t=function(n,d.pop,d.obs) {
+dd2t=function(n,d.pop,d.obs) {
   df=2*(n-1);
   t=d.pop*sqrt(n/2);
   sqrt(n/2)*suppressWarnings(dt(t,df=df,ncp=sqrt(n/2)*d.obs));
@@ -91,7 +91,7 @@ I use this feature repeatedly.
 
 1. I pass the prior probability function (`dnorm(d.pop,mean=0.3,sd=0.1)`) to `posterior` as the argument `prior`.
 
-2. Each line of `posterior` creates a function: e.g., the line `P_obsGIVENpop=function(d.pop) d_d2t(n,d.pop,d.obs);` creates a function of `d.pop` that calls the function `d_d2t` on variables `n`, `d.pop`, and `d.obs`. A further detail is that variables `n` and `d.obs` are *bound* to the values passed into `posterior` as arguments, while `d.pop` is *free* and gets its value later when the new function `P_obsGIVENpop` is called.
+2. Each line of `posterior` creates a function: e.g., the line `P_obsGIVENpop=function(d.pop) dd2t(n,d.pop,d.obs);` creates a function of `d.pop` that calls the function `dd2t` on variables `n`, `d.pop`, and `d.obs`. A further detail is that variables `n` and `d.obs` are *bound* to the values passed into `posterior` as arguments, while `d.pop` is *free* and gets its value later when the new function `P_obsGIVENpop` is called.
 
 3. The final result is likewise a function of `d.pop`: `function(d.pop) numerator(d.pop)/P_obs;`
 
