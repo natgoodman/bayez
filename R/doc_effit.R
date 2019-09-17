@@ -16,36 +16,52 @@
 ## --- Generate Figures and Tables for effit Blog Post ---
 library(nor1mix);
 ## no sections. only 4 figures
-doc_effit=function(sect=NULL,n.loi=1,...) {
+doc_effit=function(sect=NULL,...) {
   init(doc='effit',...);
   param(n,m,prop.true,d0,mean.true,sd.true,mean.false,sd.false);
-  n.lo=if(length(n)>2) sort(n)[n.loi] else min(n); n.hi=max(n);
-  prop.lo=min(prop.true); prop.hi=max(prop.true);
-  mean.mix=c(mean.true,mean.false);
-  sd.mix=c(sd.true,sd.false);
+  ## define params for norm cases
+  n.lo=10; n.hi=200;
+  mean.lo=0.3; mean.hi=0.7; mean.f=0;   # lo, hi - norm and true mix cases. f false mix cases
+  sd.norm=sd.t=0.1; sd.f=0.05;          # sd.t norm and true mix cases. sd.f false mix cases
+  ## prop.lo=min(prop.true); prop.hi=max(prop.true);
+  prop.mid=0.5;
   ## draw the figures  
   ## NG 19-09-03: REAL HACK. hardcode xlim,ylim to put all figures on same scale
-  xlim=c(-0.2,0.9);
+  xlim=c(-0.2,1.2);
   ylim=c(0,6);
   ## normals - use norMix so same code will work for norm and mixture
-  fig_effit('lo_norm',n.lo,1,m,d0,mean.true,sd.true,xlim,ylim);
-  fig_effit('hi_norm',n.hi,1,m,d0,mean.true,sd.true,xlim,ylim);
-  ## mixtures
-  fig_effit('lo_lo',n.lo,prop.lo,m,d0,mean.mix,sd.mix,xlim,ylim);
-  fig_effit('hi_lo',n.hi,prop.lo,m,d0,mean.mix,sd.mix,xlim,ylim);
-  fig_effit('lo_hi',n.lo,prop.hi,m,d0,mean.mix,sd.mix,xlim,ylim);
-  fig_effit('hi_hi',n.hi,prop.hi,m,d0,mean.mix,sd.mix,xlim,ylim);
+  figblk_start();
+  fig_effit('norm_lo_lo',n.lo,1,m,d0,mean.lo,sd.norm,xlim=xlim,ylim=ylim);
+  fig_effit('norm_hi_lo',n.hi,1,m,d0,mean.lo,sd.norm,xlim=xlim,ylim=ylim);
+  fig_effit('norm_lo_hi',n.lo,1,m,d0,mean.hi,sd.norm,xlim=xlim,ylim=ylim);
+  fig_effit('norm_hi_hi',n.hi,1,m,d0,mean.hi,sd.norm,xlim=xlim,ylim=ylim);
+  ## mixtures. now only doing 50:50s
+  figblk_start();
+  fig_effit('mix_lo_lo',n.lo,prop.mid,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_hi_lo',n.hi,prop.mid,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_lo_hi',n.lo,prop.mid,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_hi_hi',n.hi,prop.mid,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
   ##
   invisible();
 }
 ## do one figure of effit doc. shows results for one simulation id
-fig_effit=function(id,n,prop.true,m,d0,mean.mix,sd.mix,xlim,ylim) {
-  w=if(prop.true==1) 1 else c(prop.true,1-prop.true);
+fig_effit=function(id,n,prop.true,m,d0,mean.true,sd.true,mean.false=NULL,sd.false=NULL,xlim,ylim) {
+  mean.mix=c(mean.true,mean.false);
+  sd.mix=c(sd.true,sd.false);
+  if(prop.true==1) {
+    ## norm
+    w=1;
+    title=figtitle('Normal prior',n=n,mean=mean.true,d.obs=d0);
+    file=filename_norm(n,m,d0,mean.true,sd.true);
+  } else {
+    ## mixture
+    w=c(prop.true,1-prop.true);
+    title=figtitle('Mixture prior',n=n,mean.true=mean.true,prop.true=prop.true,d.obs=d0)
+    file=filename_mix(n,m,d0,prop.true,mean.true,sd.true,mean.false,sd.false);
+  }
   mix=norMix(mu=mean.mix,sigma=sd.mix,w=w);
-  sim=load_sim(n=n,m=m,d0=d0,id=id);
-  title=if(prop.true==1) figtitle('Normal prior',n=n,d.obs=d0)
-        else figtitle('Mixture prior',n=n,prop.true=prop.true,d.obs=d0);
-   dofig(plot_effit,id,sim=sim,title=title,n=n,d0=d0,mix=mix, 
+  sim=load_sim(file);
+  dofig(plot_effit,id,sim=sim,title=title,n=n,d0=d0,mix=mix, 
          breaks=25,xlim=xlim,ylim=ylim);
 }
 ## plot histogram, bayesian distributions, medians

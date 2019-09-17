@@ -17,87 +17,121 @@ library(nor1mix);
 dat_effit=function(...) {
   init(doc='effit',...);
   param(n,m,prop.true,d0,mean.true,sd.true,mean.false,sd.false,tol,m1,mmax);
-  n.lo=if(length(n)>2) sort(n)[1:2] else min(n); n.hi=max(n);
-  prop.lo=min(prop.true); prop.hi=max(prop.true);
+  ## NG 19-09-16: still undecided what cases to run. might as well run 'em all
   ## normals - use norMix so same code will work for norm and mixture
-  sim_effit('lo_norm',n=n.lo[1],m=m,d0=d0,1,mean.true,sd.true,tol,m1,mmax);
-  if (length(n.lo)>1) sim_effit('lo_norm',n=n.lo[2],m=m,d0=d0,1,mean.true,sd.true,tol,m1,mmax);
-  sim_effit('hi_norm',n=n.hi,m=m,d0=d0,1,mean.true,sd.true,tol,m1,mmax);
+  cases=expand.grid(n=n,d0=d0,mean.true=mean.true,sd.true=sd.true);
+  withrows(cases,case,{
+    sim_effit('norm',n,m,d0,1,mean.true,sd.true,tol=tol,m1=m1,mmax=mmax);
+  });
   ## mixtures
-  mean.mix=c(mean.true,mean.false);
-  sd.mix=c(sd.true,sd.false);
-  sim_effit('lo_lo',n=n.lo[1],m=m,d0=d0,prop.lo,mean.mix,sd.mix,tol,m1,mmax);
-  if (length(n.lo)>1) sim_effit('lo_lo',n=n.lo[2],m=m,d0=d0,prop.lo,mean.mix,sd.mix,tol,m1,mmax);
-  sim_effit('hi_lo',n=n.hi,m=m,d0=d0,prop.lo,mean.mix,sd.mix,tol,m1,mmax);
-  sim_effit('lo_hi',n=n.lo[1],m=m,d0=d0,prop.hi,mean.mix,sd.mix,tol,m1,mmax);
-  if (length(n.lo)>1) sim_effit('lo_hi',n=n.lo[2],m=m,d0=d0,prop.hi,mean.mix,sd.mix,tol,m1,mmax);
-  sim_effit('hi_hi',n=n.hi,m=m,d0=d0,prop.hi,mean.mix,sd.mix,tol,m1,mmax);
+  cases=expand.grid(n=n,prop.true=prop.true,d0=d0,mean.true=mean.true,sd.true=sd.true,
+                    mean.false=mean.false,sd.false=sd.false);
+  withrows(cases,case,{
+    mean.mix=c(mean.true,mean.false);
+    sd.mix=c(sd.true,sd.false);
+    sim_effit('mix',n,m,d0,prop.true,mean.true,sd.true,mean.false,sd.false,
+              tol=tol,m1=m1,mmax=mmax);
+  });
   invisible();
 }
 ## use norMix so same code will work for norm and mixture
-sim_effit=function(id,n,m,d0,prop.true,mean.mix,sd.mix,tol,m1,mmax) {
-  w=if(prop.true==1) 1 else c(prop.true,1-prop.true);
+sim_effit=function(id,n,m,d0,prop.true,mean.true,sd.true,mean.false=NULL,sd.false=NULL,
+                   tol,m1,mmax) {
+  mean.mix=c(mean.true,mean.false);
+  sd.mix=c(sd.true,sd.false);
+  if(prop.true==1) {
+    ## norm
+    w=1;
+    file=filename_norm(n,m,d0,mean.true,sd.true);
+  } else {
+    ## mixture
+    w=c(prop.true,1-prop.true);
+    file=filename_mix(n,m,d0,prop.true,mean.true,sd.true,mean.false,sd.false);
+  }
   mix=norMix(mu=mean.mix,sigma=sd.mix,w=w);
-  sim=dosim(id,n,m,d0,d.gen=rnorMix,d.args=list(obj=mix),tol,m1,mmax);
+  sim=dosim(file,n,m,d0,d.gen=rnorMix,d.args=list(obj=mix),tol,m1,mmax);
   invisible(sim);
 }
 vrnorm=Vectorize(rnorm,"mean");
-dosim=function(id,n,m,d0,d.gen,d.args,tol,m1,mmax) {
+dosim=function(file,n,m,d0,d.gen,d.args,tol,m1,mmax,
+               save=param(save.sim),save.txt=param(save.txt.sim)) {
   param(verbose,debug);
-  if (verbose) {
-    if (identical(d.gen,rnorMix))
-      expect=paste('expect',
-                   round(emix(mix=d.args$obj,n=n,m=m,d0=d0,tol=tol,mmax=mmax)/m1),'iters')
-    else expect=NULL;
-    print(paste(
-      collapse=' ',c('>>> dosim:',nvq(id,n,m,d0),expect,format(Sys.time(),"%b %d %X"))));
-  }
-  sim=data.frame(row.names=NULL);
-  m1.sum=0; i=0;
-  while(nrow(sim)<m&&m1.sum<mmax) {
-    m1=min(m1,mmax-m1.sum);           # overly cautious, but why not?
-    group0=replicate(m1,rnorm(n,mean=0));
-    d=do.call(d.gen,c(n=m1,d.args));
-    group1=vrnorm(n,mean=d);
-    mean0=colMeans(group0);
-    mean1=colMeans(group1);
-    d.raw=mean1-mean0;
-    sd0=apply(group0,2,sd);
-    sd1=apply(group1,2,sd);
-    sd=pooled_sd(sd0,sd1);
-    d.sdz=d.raw/sd;
-    sim1=data.frame(n,d.pop=d,d.sdz,sd,d.raw,mean0,mean1,sd0,sd1,row.names=NULL);
-    sim=rbind(sim,subset(sim1,subset=near(d.sdz,d0,tol)));
-    m1.sum=m1.sum+m1; 
-    if (debug) {
-      i=i+1;
-      print(paste(sep=' ','+++ dosim:',nvq(i),paste_nv('nrow',nrow(sim)),expect));
+  ## if file exists and we aren't saving, return saved sim
+  if (file.exists(file)&&(is.na(save)||!save)) {
+    if (verbose) print(paste('>>> dosim:',shortname_sim(file),'skipping'));
+    sim=load_(file,'sim')
+  } else {
+    if (verbose) {
+      if (identical(d.gen,rnorMix))
+        expect=paste('expect',
+                     round(emix(mix=d.args$obj,n=n,m=m,d0=d0,tol=tol,mmax=mmax)/m1),'iters')
+      else expect=NULL;
+      print(paste(
+        collapse=' ',c('>>> dosim:',shortname_sim(file),expect,format(Sys.time(),"%b %d %X"))));
     }
+    sim=data.frame(row.names=NULL);
+    m1.sum=0; i=0;
+    while(nrow(sim)<m&&m1.sum<mmax) {
+      m1=min(m1,mmax-m1.sum);           # overly cautious, but why not?
+      group0=replicate(m1,rnorm(n,mean=0));
+      d=do.call(d.gen,c(n=m1,d.args));
+      group1=vrnorm(n,mean=d);
+      mean0=colMeans(group0);
+      mean1=colMeans(group1);
+      d.raw=mean1-mean0;
+      sd0=apply(group0,2,sd);
+      sd1=apply(group1,2,sd);
+      sd=pooled_sd(sd0,sd1);
+      d.sdz=d.raw/sd;
+      sim1=data.frame(n,d.pop=d,d.sdz,sd,d.raw,mean0,mean1,sd0,sd1,row.names=NULL);
+      sim=rbind(sim,subset(sim1,subset=near(d.sdz,d0,tol)));
+      m1.sum=m1.sum+m1; 
+      if (debug) {
+        i=i+1;
+        print(paste(sep=' ','+++ dosim:',nvq(i),paste_nv('nrow',nrow(sim)),expect));
+      }
+    }
+    if (nrow(sim)<m)
+      warning(paste('dosim failed to generate enough rows. wanted',m,'got',nrow(sim)))
+    else sim=sim[1:m,];
+    save_(sim,file,save,save.txt);
   }
-  if (nrow(sim)<m)
-    warning(paste('dosim failed to generate enough rows. wanted',m,'got',nrow(sim)))
-  else sim=sim[1:m,];
-  save_sim(sim,n,m,d0,id);
   invisible(sim);
 }
-## for debug output
+## file functions
+filename_norm=function(n,m,d0,mean,sd) 
+  filename(param(simdir),base='sim_norm',
+           tail=paste(sep=',',paste_nv(n),paste_nv(m,m_pretty(m)),paste_nv(d0,d_pretty(d0)),
+                      paste_nv(mean,d_pretty(mean)),paste_nv(sd,sd_pretty(sd))),
+           suffix='RData');
+filename_mix=function(n,m,d0,prop.true,mean.true,sd.true,mean.false,sd.false) 
+  filename(param(simdir),base='sim_mix',
+           tail=paste(sep=',',paste_nv(n),paste_nv(m,m_pretty(m)),paste_nv(d0,d_pretty(d0)),
+                      paste_nv(pt,prop.true),
+                      paste_nv(mt,d_pretty(mean.true)),paste_nv(sdt,sd_pretty(sd.true)),
+                      paste_nv(mf,d_pretty(mean.false)),paste_nv(sdf,sd_pretty(sd.false))),
+           suffix='RData');
+
+## filename_sim=function(n,m,d0,id) 
+##   filename(param(simdir),base=paste(sep='_','sim',id),
+##            tail=paste(sep=',',paste_nv(n),paste_nv(m,m_pretty(m)),paste_nv(d0,d_pretty(d0))),
+##            suffix='RData');
+## save_sim=function(sim,n,m,d0,id) save(sim,file=filename_sim(n,m,d0,id));
+
+load_sim=get_sim=function(file,tol=param(tol),prune=F) {
+  sim=load_(file,'sim')
+  if (prune) sim=subset(sim,subset=near(d.sdz,d0,tol));
+  invisible(sim);
+}
+
+## for verbose or debug output
 emix=function(mix,n,m,d0,tol,mmax) {
   f=function()
     integrate(function(d.pop) dnorMix(d.pop,mix)*d_d2t(n=n,d=d0,d0=d.pop),-Inf,Inf)$value*2*tol;
   uniroot(function(m.need) m.need*f()-m,interval=c(1,mmax))$root;
 }
-## file functions
-filename_sim=function(n,m,d0,id) 
-  filename(param(simdir),base=paste(sep='_','sim',id),
-           tail=paste(sep=',',paste_nv(n),paste_nv(m,m_pretty(m)),paste_nv(d0,d_pretty(d0))),
-           suffix='RData');
-save_sim=function(sim,n,m,d0,id) save(sim,file=filename_sim(n,m,d0,id));
+shortname_sim=function(file) sub('^sim_','',desuffix(basename(file)));
 
-load_sim=get_sim=function(n,m,d0,id,tol=param(tol),prune=F) {
-  sim=load_(filename_sim(n,m,d0,id),'sim')
-  if (prune) sim=subset(sim,subset=near(d.sdz,d0,tol));
-  invisible(sim);
-}
-
+           
 
 
