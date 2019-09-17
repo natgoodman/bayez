@@ -20,8 +20,8 @@
 ##   prior is function of d.pop, eg, function(d.pop) dnorm(d.pop,mean=0.3,sd=0.1)
 ##
 posterior=function(n,d.obs,prior) {
-  ## probability of d.obs given d.pop for examples at hand. d_d2t defined below
-  P_obsGIVENpop=function(d.pop) d_d2t(n,d.pop,d.obs);
+  ## probability of d.obs given d.pop for examples at hand. dd2t defined below
+  P_obsGIVENpop=function(d.pop) dd2t(n,d.pop,d.obs);
   ## numerator in Bayes formula
   numerator=function(d.pop) prior(d.pop)*P_obsGIVENpop(d.pop);
   ## denominator in Bayes formula
@@ -32,7 +32,7 @@ posterior=function(n,d.obs,prior) {
 
 ## probability density of noncentral t in terms of n, d.pop, d.obs
 ##   adapted from https://natgoodman.github.io/repwr/stats.stable.html
-d_d2t=function(n,d.pop,d.obs) {
+dd2t=function(n,d.pop,d.obs) {
   df=2*(n-1);
   t=d.pop*sqrt(n/2);
   sqrt(n/2)*suppressWarnings(dt(t,df=df,ncp=sqrt(n/2)*d.obs));
