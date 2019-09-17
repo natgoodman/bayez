@@ -26,12 +26,14 @@ init=function(
   docx=match.arg(doc,doc.all),
   ## simulation
   n=switch(docx,                          # sample sizes
-           readme=c(20,100),effit=c(10,20,200)), # effit must have 3 elements!
+           readme=c(20,100),effit=c(10,20,200)), # effit needs 3 elements!
   m=switch(docx,readme=1e2,effit=3e3),    # number of observations in desired range
-  prop.true=switch(docx,readme=0.5,effit=c(0.25,0.75)), # proportion of true cases
+                                          # proportion of true cases
+  prop.true=switch(docx,readme=0.5,effit=c(0.25,0.50,0.75)), 
   d0=switch(docx,readme=0.5,effit=0.5),   # center of desired range
   tol=switch(docx,readme=1e-3,effit=1e-3),# tolerance around d0
-  mean.true=0.3,                          # mean and sd of true and false cases
+                                          # mean and sd of true and false cases
+  mean.true=switch(docx,readme=0.3,effit=c(0.3,0.7)), # mean of true case
   sd.true=0.1,
   mean.false=0,
   sd.false=0.05,
