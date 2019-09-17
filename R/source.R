@@ -44,7 +44,7 @@ source_ifexists=function(file) if (file.exists(file)) source(file);
 source_all=function(files=SOURCE) {
   source_files(files);
   ## source dat_XXX, doc_XXX files so top level functions defined
-  ## NOTE: these top level files call init which resources doc-specific files
+  ## NOTE: these top level functions call init which re-sources doc-specific files
   source_files(list.files('R',pattern='^(doc_|dat_).*.R',full.names=T));
   if (exists('param.env')) source_doc();
 }
