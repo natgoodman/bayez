@@ -125,7 +125,19 @@ cq=function(...) {
    stop("... must contain atomic data like names or character strings");
  return(vapply(dots,as.character,""));
 }
-
+## like 'with' but works on rows of data.frame vectors. I use it to iterate over cases
+## NG 19-07-15: this version might work... famous last words :)
+withrows=function(cases,case,expr) {
+  var=as.character(pryr::subs(case));
+  expr=pryr::subs(expr);
+  parent=parent.frame(n=1);
+  lapply(1:nrow(cases),function(i) {
+    case=cases[i,];
+    ## assign case so it'll be data frame in called code
+    env=list2env(case,parent=parent); # assign vars from case
+    assign(var,case,envir=env);         # so case will be visible in called code
+    eval(expr,envir=env);               # do it!
+  })}
 ## not in - based on example in RefMan - more intutive than !%in%
 "%notin%"=function(x,table) match(x,table,nomatch=0)==0
 ## between, near - to subset sim results. closed on bottom, open on top
