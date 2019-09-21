@@ -62,9 +62,12 @@ dosim=function(file,n,m,d0,d.gen,d.args,tol,m1,mmax,
     sim=load_(file,'sim')
   } else {
     if (verbose) {
-      if (identical(d.gen,rnorMix))
-        expect=paste('expect',
-                     round(emix(mix=d.args$obj,n=n,m=m,d0=d0,tol=tol,mmax=mmax)/m1),'iters')
+      if (identical(d.gen,rnorMix)) {
+        expect=round(emix(mix=d.args$obj,n,m,d0,tol)/m1);
+        emax=mmax/m1;
+        if (expect>emax) stop(paste('params imply',expect,'iters, but max allowed is',emax));
+        expect=paste('expect',expect,'iters');
+      }
       else expect=NULL;
       print(paste(
         collapse=' ',c('>>> dosim:',shortname_sim(file),expect,format(Sys.time(),"%b %d %X"))));
@@ -98,6 +101,7 @@ dosim=function(file,n,m,d0,d.gen,d.args,tol,m1,mmax,
   }
   invisible(sim);
 }
+
 ## file functions
 filename_norm=function(n,m,d0,mean,sd) 
   filename(param(simdir),base='sim_norm',
@@ -112,12 +116,6 @@ filename_mix=function(n,m,d0,prop.true,mean.true,sd.true,mean.false,sd.false)
                       paste_nv(mf,d_pretty(mean.false)),paste_nv(sdf,sd_pretty(sd.false))),
            suffix='RData');
 
-## filename_sim=function(n,m,d0,id) 
-##   filename(param(simdir),base=paste(sep='_','sim',id),
-##            tail=paste(sep=',',paste_nv(n),paste_nv(m,m_pretty(m)),paste_nv(d0,d_pretty(d0))),
-##            suffix='RData');
-## save_sim=function(sim,n,m,d0,id) save(sim,file=filename_sim(n,m,d0,id));
-
 load_sim=get_sim=function(file,tol=param(tol),prune=F) {
   sim=load_(file,'sim')
   if (prune) sim=subset(sim,subset=near(d.sdz,d0,tol));
@@ -125,11 +123,14 @@ load_sim=get_sim=function(file,tol=param(tol),prune=F) {
 }
 
 ## for verbose or debug output
-emix=function(mix,n,m,d0,tol,mmax) {
-  f=function()
-    integrate(function(d.pop) dnorMix(d.pop,mix)*d_d2t(n=n,d=d0,d0=d.pop),-Inf,Inf)$value*2*tol;
-  uniroot(function(m.need) m.need*f()-m,interval=c(1,mmax))$root;
+## NG 19-09-19: replace uniroot by direct calculation. sad it too me so long to see this...
+emix=function(mix,n,m,d0,tol) {
+  ## success rate per simulation
+  rate=integrate(function(d.pop) dnorMix(d.pop,mix)*d_d2t(n=n,d=d0,d0=d.pop),-Inf,Inf)$value*2*tol;
+  ## number of simulations to acheive m successes
+  m/rate;
 }
+
 shortname_sim=function(file) sub('^sim_','',desuffix(basename(file)));
 
            
