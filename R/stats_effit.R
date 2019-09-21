@@ -80,8 +80,10 @@ post_bayes=function(n,d0,prior) {
 ## generate the remaining posterior prob functions. exact and approx
 ##   thses assume init_bayes already run
 ## NG 19-08-31: stop.on.error=F needed for 'mix' prior. dunno why...
+## NG 19-09-20: documentation recommends lower bound of -Inf instead of large number
+##              with -10, some cases produced really bad results..
 pbayes_exact=function(d.bayes) Vectorize(function(x)
-  integrate(d.bayes,-10,x,stop.on.error=FALSE)$value);
+  integrate(d.bayes,-Inf,x,stop.on.error=FALSE)$value);
 qbayes_exact=function(p.bayes) Vectorize(function(p) {
   if (p>0&p<1) uniroot(function(x) p.bayes(x)-p,interval=c(-10,10))$root
   else if (p<0|p>1) NaN else if (p==0) -Inf else Inf;
