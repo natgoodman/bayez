@@ -23,8 +23,8 @@ doc_effit=function(sect=NULL,...) {
   n.lo=10; n.hi=200;
   mean.lo=0.3; mean.hi=0.7; mean.f=0;   # lo, hi - norm and true mix cases. f false mix cases
   sd.norm=sd.t=0.1; sd.f=0.05;          # sd.t norm and true mix cases. sd.f false mix cases
-  ## prop.lo=min(prop.true); prop.hi=max(prop.true);
-  prop.mid=0.5;
+  prop.lo=0.25; prop.hi=0.75;
+  ## prop.mid=0.5;
   ## draw the figures  
   ## NG 19-09-03: REAL HACK. hardcode xlim,ylim to put all figures on same scale
   xlim=c(-0.2,1.2);
@@ -37,10 +37,10 @@ doc_effit=function(sect=NULL,...) {
   fig_effit('norm_hi_hi',n.hi,1,m,d0,mean.hi,sd.norm,xlim=xlim,ylim=ylim);
   ## mixtures. now only doing 50:50s
   figblk_start();
-  fig_effit('mix_lo_lo',n.lo,prop.mid,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
-  fig_effit('mix_hi_lo',n.hi,prop.mid,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
-  fig_effit('mix_lo_hi',n.lo,prop.mid,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
-  fig_effit('mix_hi_hi',n.hi,prop.mid,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_lo_lo',n.lo,prop.lo,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_hi_lo',n.hi,prop.lo,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_lo_hi',n.lo,prop.hi,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
+  fig_effit('mix_hi_hi',n.hi,prop.hi,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
   ##
   invisible();
 }
