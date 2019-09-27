@@ -23,8 +23,8 @@ paste_nv=function(name,value,sep='=') {
   paste(sep=sep,name,value); 
 }
 ## generate list of name=value using values from parent environment. code adapted from base::rm
-## ignore tells whether to ignore NULL and non-existant names
-nvq=function(...,sep=' ',ignore=F) {
+## IGNORE tells whether to ignore NULL and non-existant names
+nvq=function(...,sep=' ',IGNORE=F) {
   dots=match.call(expand.dots=FALSE)$...
    if (length(dots) &&
      !all(vapply(dots,function(x) is.symbol(x) || is.character(x),NA,USE.NAMES=FALSE))) 
@@ -34,15 +34,42 @@ nvq=function(...,sep=' ',ignore=F) {
   names=vapply(dots,as.character,"");
   values=sapply(names,function(name) {
     if (exists(name,envir=env)) get(name,envir=env)
-    else if (!ignore) stop(paste('no value for',name,'in parent environment'));
+    else if (!IGNORE) stop(paste('no value for',name,'in parent environment'));
   });
   ## values=sapply(names,function(name)
   ##   if (exists(name,envir=parent.frame(n=2))) get(name,envir=parent.frame(n=2))
   ##   else stop(paste('no value for',name,'in parent environment')));
   paste(collapse=sep,unlist(mapply(function(name,value)
-    if (!is.null(value)|!ignore) paste(sep='=',name,value) else NULL,names,values)));
+    if (!is.null(value)|!IGNORE) paste(sep='=',name,value) else NULL,names,values)));
 }
-## pretty print typical values of n, d, sd & m
+## NG 19-09-25: extend nvq for filenames. also to allow nested calls
+## TODO: merge nvq, nvq_file
+nvq_file=function(...,SEP=',',DOTS,PARENT=1,PRETTY=T,IGNORE=F) {
+  if (missing(DOTS)) DOTS=match.call(expand.dots=FALSE)$...
+  else if (missing(PARENT)) PARENT=2;
+  if (length(DOTS) &&
+     !all(vapply(DOTS,function(x) is.symbol(x) || is.character(x),NA,USE.NAMES=FALSE))) 
+     stop("... must contain names or character strings");
+  env=parent.frame(n=PARENT);
+  names=vapply(DOTS,as.character,"");
+  if (IGNORE) names=names[sapply(names,function(name) exists(name,envir=env))];
+  values=sapply(names,function(name) {
+    if (exists(name,envir=env)) {
+      value=get(name,envir=env);
+      if (PRETTY) value=pretty(name,value);
+      value;
+    }
+    else if (!IGNORE) stop(paste('no value for',name,'in parent environment'));
+  });
+  paste(collapse=SEP,unlist(mapply(function(name,value)
+    if (!is.null(value)|!IGNORE) paste(sep='=',name,value) else NULL,names,values)));
+}
+## pretty print typical values of i, n, d, sd & m
+pretty=function(name,value) {
+  fun=switch(name,i=i_pretty,n=n_pretty,d=d_pretty,sd=sd_pretty,m=m_pretty,as.character);
+  fun(value);
+}
+i_pretty=function(i) sprintf("%03i",i)
 n_pretty=function(n) as.character(n);
 d_pretty=function(d) sprintf('%3.2f',d);
 sd_pretty=function(sd) sprintf('%3.2f',sd);
