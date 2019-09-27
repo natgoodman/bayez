@@ -13,7 +13,7 @@ citecolor: green
 urlcolor: blue
 ---
 
-This working paper shows an R implementation of Bayes's formula as used in the blog post [What's the Effect Size?](https://natgoodman.github.io/bayez/effit.stable.html) to estimate true effect size in two group difference-of-mean studies. The main point is that the implementation is really, really simple.  With all the fuss and bother about Bayesian methods, I imagined it would be incredibly hard to code.  Happily not.
+This working paper shows an R implementation of Bayes's formula as used in the blog post [What's the True Effect Size? It Depends What You Think](https://natgoodman.github.io/bayez/effit.stable.html) to estimate true effect size in two group difference-of-mean studies. The main point is that the implementation is really, really simple.  With all the fuss and bother about Bayesian methods, I imagined it would be incredibly hard to code.  Happily not.
 
 ## Bayes's Formula
 

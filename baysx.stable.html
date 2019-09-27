@@ -152,7 +152,7 @@ $(document).ready(function () {
 </div>
 
 
-<p>This working paper shows an R implementation of Bayes’s formula as used in the blog post <a href="https://natgoodman.github.io/bayez/effit.stable.html">What’s the Effect Size?</a> to estimate true effect size in two group difference-of-mean studies. The main point is that the implementation is really, really simple. With all the fuss and bother about Bayesian methods, I imagined it would be incredibly hard to code. Happily not.</p>
+<p>This working paper shows an R implementation of Bayes’s formula as used in the blog post <a href="https://natgoodman.github.io/bayez/effit.stable.html">What’s the True Effect Size? It Depends What You Think</a> to estimate true effect size in two group difference-of-mean studies. The main point is that the implementation is really, really simple. With all the fuss and bother about Bayesian methods, I imagined it would be incredibly hard to code. Happily not.</p>
 <div id="bayess-formula" class="section level2">
 <h2>Bayes’s Formula</h2>
 <p>The line of math below is Bayes’s formula for the example at hand. An important nuance is that the “probabilities” are <em>probability densities</em> - think R’s <code>dnorm</code>.</p>
@@ -176,8 +176,8 @@ P(d_{pop} \mid d_{obs}) = \frac {P(d_{pop}) \times P(d_{obs} \mid d_{pop}) } {P(
 ##   prior is function of d.pop, eg, function(d.pop) dnorm(d.pop,mean=0.3,sd=0.1)
 ##
 posterior=function(n,d.obs,prior) {
-  ## probability of d.obs given d.pop for examples at hand. d_d2t defined below
-  P_obsGIVENpop=function(d.pop) <span class="kw">d_d2t</span>(n,d.pop,d.obs);
+  ## probability of d.obs given d.pop for examples at hand. dd2t defined below
+  P_obsGIVENpop=function(d.pop) <span class="kw">dd2t</span>(n,d.pop,d.obs);
   ## numerator in Bayes formula
   numerator=function(d.pop) <span class="kw">prior</span>(d.pop)*<span class="kw">P_obsGIVENpop</span>(d.pop);
   ## denominator in Bayes formula
@@ -188,7 +188,7 @@ posterior=function(n,d.obs,prior) {
 
 ## probability density of noncentral t in terms of n, d.pop, d.obs
 ##   adapted from https://natgoodman.github.io/repwr/stats.stable.html
-d_d2t=function(n,d.pop,d.obs) {
+dd2t=function(n,d.pop,d.obs) {
   df=<span class="dv">2</span>*(n<span class="dv">-1</span>);
   t=d.pop*<span class="kw">sqrt</span>(n/<span class="dv">2</span>);
   <span class="kw">sqrt</span>(n/<span class="dv">2</span>)*<span class="kw">suppressWarnings</span>(<span class="kw">dt</span>(t,<span class="dt">df=</span>df,<span class="dt">ncp=</span><span class="kw">sqrt</span>(n/<span class="dv">2</span>)*d.obs));
@@ -215,7 +215,7 @@ dpost=<span class="kw">posterior</span>(<span class="dt">n=</span><span class="d
 <p>I use this feature repeatedly.</p>
 <ol style="list-style-type: decimal">
 <li><p>I pass the prior probability function (<code>dnorm(d.pop,mean=0.3,sd=0.1)</code>) to <code>posterior</code> as the argument <code>prior</code>.</p></li>
-<li><p>Each line of <code>posterior</code> creates a function: e.g., the line <code>P_obsGIVENpop=function(d.pop) d_d2t(n,d.pop,d.obs);</code> creates a function of <code>d.pop</code> that calls the function <code>d_d2t</code> on variables <code>n</code>, <code>d.pop</code>, and <code>d.obs</code>. A further detail is that variables <code>n</code> and <code>d.obs</code> are <em>bound</em> to the values passed into <code>posterior</code> as arguments, while <code>d.pop</code> is <em>free</em> and gets its value later when the new function <code>P_obsGIVENpop</code> is called.</p></li>
+<li><p>Each line of <code>posterior</code> creates a function: e.g., the line <code>P_obsGIVENpop=function(d.pop) dd2t(n,d.pop,d.obs);</code> creates a function of <code>d.pop</code> that calls the function <code>dd2t</code> on variables <code>n</code>, <code>d.pop</code>, and <code>d.obs</code>. A further detail is that variables <code>n</code> and <code>d.obs</code> are <em>bound</em> to the values passed into <code>posterior</code> as arguments, while <code>d.pop</code> is <em>free</em> and gets its value later when the new function <code>P_obsGIVENpop</code> is called.</p></li>
 <li><p>The final result is likewise a function of <code>d.pop</code>: <code>function(d.pop) numerator(d.pop)/P_obs;</code></p></li>
 <li><p>The examples store the function in the variable <code>dpost</code>, then use <code>curve</code> (a base R function) to call <code>dpost</code> and plot the result.</p></li>
 </ol>
