@@ -37,7 +37,7 @@ init=function(
   sd.true=0.1,
   mean.false=0,
   sd.false=0.05,
-  ## these control low level operation of dosim
+  ## low level operation of dosim
   m1=switch(docx,readme=1e2,effit=1e4),   # number of inner-loop iterations
   mmax=switch(docx,readme=1e2,effit=1e8), # max number of outer-loop iterations
   ## data and doc generation functions
@@ -52,14 +52,14 @@ init=function(
   alldir=c(datadir,simdir,figdir,tbldir),
 
   ## program control
-  verbose=F,                              # print progress messages
-  debug=F,                                # call debug code
+  verbose=FALSE,                          # print progress messages
+  debug=FALSE,                            # call debug code
   docsect=NULL,                           # all document sections. set by docfun
   ## plot control
   figscreen=if(docx=='readme') T else !save.fig,
                                           # plot figures on screen
   fignew=figscreen,                       # plot each figure in new window
-  figextra=F,                             # plot extra figures - NOT USED
+  figextra=FALSE,                         # plot extra figures - NOT USED
   ## control saving results
   save=NA,                                # shorthand for other save params 
                                           #   NA means save unless file exists
@@ -72,23 +72,24 @@ init=function(
   save.txt.sim=!is.na(save.txt)&save.txt, # save txt simulations. default F
   save.txt.top=is.na(save.txt)|save.txt,  # save txt top level results. default T
 
-  save.out=T,                             # save outputs (figures and tables) when called via dofig, dotbl
+  save.out=TRUE,                          # save outputs (figures and tables)
+                                          #   when called via dofig, dotbl
   save.fig=save.out,                      # save figures (when called via dofig)
   save.tbl=save.out,                      # save tables (when called via dotbl)
-  save.txt.tbl=T,                         # save txt tables when saving tables. default T
+  save.txt.tbl=TRUE,                      # save txt tables when saving tables. default T
 
-  clean=F,                                # controls specific clean params
+  clean=FALSE,                            # controls specific clean params
   clean.top=clean,                        # clean top level data
   clean.sim=clean,                        # clean simulations - remove simdir
   clean.data=all(clean.top,clean.sim),    # clean all data - remove datadir
-  clean.out=F,                            # controls clean.fig, clean.tbl
+  clean.out=FALSE,                        # controls clean.fig, clean.tbl
   clean.fig=clean.out,                    # clean figures - remove figdir
   clean.tbl=clean.out,                    # clean tables - remove tbldir
-  
+  clean.type=NULL,                        # specific data types to clean. see clean_type
   ## output modifiers
   outpfx=NULL,                            # prefix before figure or table number - NOT USED
   outsfx=letters,                         # suffix in figure and table blocks
-  sectpfx=F,                              # add section number to prefix eg, S1 - NOT USED
+  sectpfx=FALSE,                          # add section number to prefix eg, S1 - NOT USED
   sectnum=1,                              # section number. usually set in docs
   sect=NULL,
   ## figures
@@ -96,6 +97,13 @@ init=function(
   figsfx=outsfx,
   fignum=1,
   figblk=NULL,                            # index into figsfx if in figure block
+  ## for multiple plots per device (page)
+  figdev=FALSE,                           # TRUE when multiple plots per device active
+  figdev.num=1,                           # device (page) number. to construct filenames
+  figdev.pfx='dev',                       # prefix for device filenames
+  figdev.screen=NA,                       # R dev number for plot to screen
+  figdev.file=NA,                         # R dev number for plot to file
+  fig.file=NULL,                          # figure filename - for plotting to screen and file
   ## tables
   tblpfx=outpfx,
   tblsfx=outsfx,
@@ -115,31 +123,35 @@ init=function(
   ## do it before calling any functions that rely on params
   init_param();
   ## clean and create directories as needed
-  if (clean.data) unlink(datadir,recursive=T)
+  if (clean.data) unlink(datadir,recursive=TRUE)
   else {
     if (clean.top) {
       ## adapted from stackoverflow.com/questions/22069095. Thx!
-      paths=list.files(datadir,full.names=T);
+      paths=list.files(datadir,full.names=TRUE);
       unlink(paths[!file.info(paths)$isdir]);
     }
-    if (clean.sim) unlink(simdir,recursive=T);
+    if (clean.sim) unlink(simdir,recursive=TRUE);
   }
-  if (clean.fig) unlink(figdir,recursive=T);
-  if (clean.tbl) unlink(tbldir,recursive=T);
+  if (clean.fig) unlink(figdir,recursive=TRUE);
+  if (clean.tbl) unlink(tbldir,recursive=TRUE);
+  sapply(clean.type,clean_type);
   sapply(alldir,function(dir) dir.create(dir,recursive=TRUE,showWarnings=FALSE));
   invisible(param.env);
 }
   
 ## clean specific data type. deletes directory, and any top level files
-cleanq=function(what,cleandir=T) {
-  what=as.character(pryr::subs(what));
+clean_type=function(what,cleandir=T) {
+  param(datadir);
   ## delete top level files if exist
-  unlink(filename(datadir,list.files(datadir,pattern=paste(sep='','^',what,'\\.'))));
+  files=list.files(datadir,full.names=T,pattern=paste(sep='','^',what,'\\.(RData|txt)'));
+  unlink(files);
   if (cleandir) {
     whatdir=paste(sep='',what,'dir');
     ## delete directory if exists
     if (exists(whatdir,envir=param.env)) unlink(get(whatdir,envir=param.env),recursive=T);
   }
 }
-
-  
+cleanq=function(what,cleandir=T) {
+  what=as.character(pryr::subs(what));
+  clean_type(what,cleandir);
+}
