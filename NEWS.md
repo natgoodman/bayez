@@ -1,9 +1,16 @@
 Revision history for bayez repository
 ================
 Nathan (Nat) Goodman
-September 11, 2019
+September 27, 2019
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.01 2019-09-27
+-----------------------
+
+-   Versions of `effit` and `baysx` documents ready for external review
+-   Code changes to improve layout of figures for TRN
+-   Port changes from `misig` repo to create name=value strings for file names
+
 Release 0.20 2019-09-11
 -----------------------
 

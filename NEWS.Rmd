@@ -1,7 +1,7 @@
 ---
 title: "Revision history for bayez repository"
 author: "Nathan (Nat) Goodman"
-date: "September 11, 2019"
+date: "September 27, 2019"
 output:
   html_document: default
   github_document:
@@ -12,6 +12,12 @@ citecolor: green
 urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+
+## Release 1.01 2019-09-27
+
+- Versions of `effit` and `baysx` documents ready for external review
+- Code changes to improve layout of figures for TRN
+- Port changes from `misig` repo to create name=value strings for file names
 
 ## Release 0.20 2019-09-11
 
