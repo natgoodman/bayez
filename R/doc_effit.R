@@ -16,7 +16,7 @@
 ## --- Generate Figures and Tables for effit Blog Post ---
 library(nor1mix);
 ## no sections. only 4 figures
-doc_effit=function(sect=NULL,...) {
+doc_effit=function(sect=NULL,TRN=FALSE,...) {
   init(doc='effit',...);
   param(n,m,prop.true,d0,mean.true,sd.true,mean.false,sd.false);
   ## define params for norm cases
@@ -30,18 +30,21 @@ doc_effit=function(sect=NULL,...) {
   xlim=c(-0.2,1.2);
   ylim=c(0,6);
   ## normals - use norMix so same code will work for norm and mixture
+  if (TRN) figdev_start('norm');
   figblk_start();
   fig_effit('norm_lo_lo',n.lo,1,m,d0,mean.lo,sd.norm,xlim=xlim,ylim=ylim);
   fig_effit('norm_hi_lo',n.hi,1,m,d0,mean.lo,sd.norm,xlim=xlim,ylim=ylim);
   fig_effit('norm_lo_hi',n.lo,1,m,d0,mean.hi,sd.norm,xlim=xlim,ylim=ylim);
   fig_effit('norm_hi_hi',n.hi,1,m,d0,mean.hi,sd.norm,xlim=xlim,ylim=ylim);
   ## mixtures. now only doing 50:50s
+  if (TRN) figdev_start('mix');
   figblk_start();
   fig_effit('mix_lo_lo',n.lo,prop.lo,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
   fig_effit('mix_hi_lo',n.hi,prop.lo,m,d0,mean.lo,sd.t,mean.f,sd.f,xlim,ylim);
   fig_effit('mix_lo_hi',n.lo,prop.hi,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
   fig_effit('mix_hi_hi',n.hi,prop.hi,m,d0,mean.hi,sd.t,mean.f,sd.f,xlim,ylim);
   ##
+  if (TRN) figdev_end();
   invisible();
 }
 ## do one figure of effit doc. shows results for one simulation id
