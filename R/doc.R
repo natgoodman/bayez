@@ -22,43 +22,48 @@
 ##   choose argument names carefully!
 dofig=
   function(figfun,figname=NULL,title=NULL,sect=param(sect),...) {
-    param(figextra,save.fig,figscreen,fignew);
-    file=filename_fig(figlabel(where='filename'),sect,figname);
-    plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
-    plot.to.screen=figscreen;           # for stylistic consistency
-    ## NG 18-08-10: new scheme for plotting to file
-    ##   plot to screen and file: dev.new here, dev.copy later
-    ##   plot to screen only: dev.new here, no dev.copy later
-    ##   plot to file only: png here, dev.off later
-    ## plot.to.file only doesn't work if figfun returns multiple figures
-    ##   trash multi-figure capability. we don't use it now
-    if (!(plot.to.file||plot.to.screen)) {
-      msg=paste(sep=' ',paste_nv(figscreen),'and',paste_nv(save.fig));
-      if (is.na(save.fig)) msg=paste(sep=' ',msg,'and figure file',file,'exists');
-      msg=paste(sep=' ',msg,'which means there is no where to plot the figure');
-      stop(msg);
-    }
-    ##   bg='white' needed else image copied with transparent bg; renders as grey
-    if (plot.to.screen) {
-      dev=dev.new(bg='white');
-      dev=dev.cur();
-    }
-    if (plot.to.file&!plot.to.screen) {
-      ## png parameters found by trial and error. look reasonable
-      ## TODO: learn the right way to do this!
-      png(filename=file,height=8,width=8,units='in',res=200,pointsize=12);
-      dev.png=dev.cur();
-    }
+    param(figdev,figextra,save.fig,figscreen,fignew);
+    if (!figdev) {
+      ## not in figdev - usual case
+      file=filename_fig(figlabel(where='filename'),sect,figname);
+      plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
+      plot.to.screen=figscreen;           # for stylistic consistency
+      ## NG 18-08-10: new scheme for plotting to file
+      ##   plot to screen and file: dev.new here, dev.copy later
+      ##   plot to screen only: dev.new here, no dev.copy later
+      ##   plot to file only: png here, dev.off later
+      ## plot.to.file only doesn't work if figfun returns multiple figures
+      ##   trash multi-figure capability. we don't use it now
+      if (!(plot.to.file||plot.to.screen)) {
+        msg=paste(sep=' ',paste_nv(figscreen),'and',paste_nv(save.fig));
+        if (is.na(save.fig)) msg=paste(sep=' ',msg,'and figure file',file,'exists');
+        msg=paste(sep=' ',msg,'which means there is no where to plot the figure');
+        stop(msg);
+      }
+      ##   bg='white' needed else image copied with transparent bg; renders as grey
+      if (plot.to.screen) {
+        dev.new(bg='white');
+        dev=dev.cur();
+      }
+      if (plot.to.file&!plot.to.screen) {
+        ## png parameters found by trial and error. look reasonable
+        ## TODO: learn the right way to do this!
+        png(filename=file,height=8,width=8,units='in',res=200,pointsize=12);
+        dev.png=dev.cur();
+      }}
     ## draw the figure!
     figfun(title=title,...);
-    if (plot.to.file&plot.to.screen) 
-      ## png parameters found by trial and error. look reasonable
-      ## TODO: learn the right way to do this!
-      dev.png=dev.copy(png,filename=file,height=8,width=8,units='in',res=200,pointsize=12);
-    ## always close plot.to.file device
-    if (plot.to.file)  dev.off(dev.png);
-    ## close plot.to.screen device unless user wants each figure in new window
-    if (plot.to.screen&&!fignew) dev.off(dev);
+    if (!figdev) {
+      ## not in figdev - usual case
+      if (plot.to.file&plot.to.screen) 
+        ## png parameters found by trial and error. look reasonable
+        ## TODO: learn the right way to do this!
+        dev.png=dev.copy(png,filename=file,height=8,width=8,units='in',res=200,pointsize=12);
+      ## always close plot.to.file device
+      if (plot.to.file)  dev.off(dev.png);
+      ## close plot.to.screen device unless user wants each figure in new window
+      if (plot.to.screen&&!fignew) dev.off(dev);
+    }
     figinc();
     figname;
   }
@@ -210,4 +215,76 @@ outblk_end=function() {
   xfigblk_end();
   tblblk_end();
 }
+##### Manage multiple plots per device (page)
+## CAUTION: quick hack for TRN post!
+##  doesn't worry about user plotting too many figures for the device!
+figdev_start=function(figdev.name=NULL,sect=NULL,mfrow=c(2,2),mfcol=NULL,...) {
+  param(figdev,save.fig,figscreen,fignew);
+  if (figdev) figdev_end();             # if already in figdev, end it
+  file=filename_fig(figdev_label(),sect,figdev.name);
+  param(fig.file=file);
+  plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
+  plot.to.screen=figscreen;           # for stylistic consistency
+  ## NG 18-08-10: new scheme for plotting to file
+  ##   plot to screen and file: dev.new here, dev.copy later
+  ##   plot to screen only: dev.new here, no dev.copy later
+  ##   plot to file only: png here, dev.off later
+  ## plot.to.file only doesn't work if figfun returns multiple figures
+  ##   trash multi-figure capability. we don't use it now
+  if (!(plot.to.file||plot.to.screen)) {
+    msg=paste(sep=' ',paste_nv(figscreen),'and',paste_nv(save.fig));
+    if (is.na(save.fig)) msg=paste(sep=' ',msg,'and figure file',file,'exists');
+    msg=paste(sep=' ',msg,'which means there is no where to plot the figure');
+    stop(msg);
+  }
+  if (!missing(mfrow)&&!missing(mfcol)) stop("can only specify one of 'mfrow' or 'mfcol'");
+  if (!missing(mfcol)) mfrow=NULL;
+  ##   bg='white' needed else image copied with transparent bg; renders as grey
+  if (plot.to.screen) {
+    dev.new(bg='white');
+    param(figdev.screen=dev.cur());
+  }
+  if (plot.to.file&!plot.to.screen) {
+    ## png parameters found by trial and error. look reasonable
+    ## TODO: learn the right way to do this!
+    png(filename=file,height=8,width=8,units='in',res=200,pointsize=12);
+    param(figdev.file=dev.cur());
+  }
+  if (!is.null(mfrow)) par(mfrow=mfrow) else par(mfcol=mfcol);
+  param(figdev=TRUE);
+}
+figdev_end=function() {
+  param(figdev,save.fig,figscreen,fignew,fig.file,figdev.file,figdev.screen);
+  if (!figdev) return();                # do nothing if not if not in figdev
+  plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
+  plot.to.screen=figscreen;           # for stylistic consistency
+  if (plot.to.file&plot.to.screen) {
+    ## png parameters found by trial and error. look reasonable
+    ## TODO: learn the right way to do this!
+    dev.png=dev.copy(png,filename=fig.file,height=8,width=8,units='in',res=200,pointsize=12);
+    dev.off(dev.png);
+  }
+  ## always close plot.to.file device if exists
+  if (plot.to.file&!is.na(figdev.file))  dev.off(figdev.file);
+  ## close plot.to.screen device unless user wants each figure in new window
+  if (plot.to.screen&&!fignew) dev.off(figdev.screen)
+  else {
+    ## reset 'figs per page' to default
+    par(mfcol=c(1,1));
+    par(mfcol=c(1,1));
+  }
+  figdev_inc();
+  param(fig.file=NULL,figdev.file=NA,figdev.screen=NA);
+}
+figdev_inc=function() param(figdev.num=param(figdev.num)+1);
 
+## construct figdev label for filename
+figdev_label=function() {
+  param(sectpfx,sectnum,figdev.pfx,figdev.num);
+  pfx=figdev.pfx;
+  num=figdev.num;
+  num=sprintf('%03i',num);
+  if (!is.null(sectnum)) sectnum=sprintf('%02i',sectnum);
+  if(sectpfx) pfx=paste(collapse='',c(pfx,sectnum));
+  paste(collapse='',c(pfx,num));
+}
