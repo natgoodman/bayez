@@ -1,9 +1,17 @@
 Revision history for bayez repository
 ================
 Nathan (Nat) Goodman
-September 27, 2019
+October 2, 2019
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.10 2019-10-02
+-----------------------
+
+Posted version of `effit` blog post
+
+-   "TRN" version with Rmd math notation (`latex`) converted to Word notation
+-   `effit.TRN.docx` generated from `effit.TRN.Rmd`
+
 Release 1.01 2019-09-27
 -----------------------
 
